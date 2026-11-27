@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_PORT = '5000'
-        ZAP_API  = 'http://172.17.0.1:8090'
+        ZAP_API  = 'http://zap:8080'
     }
 
     stages {
@@ -53,24 +53,20 @@ pipeline {
         stage('Security Test') {
             steps {
                 echo '=== ETAPA 5: SECURITY TEST (SCA Dependency-Check + DAST OWASP ZAP) ==='
-                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --noupdate --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
+                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
 
                 sh '''
-                    APP_IP=$(hostname -i | awk '{print $1}')
-                    TARGET_URL="http://${APP_IP}:${APP_PORT}/hello?name=TEST"
+                    TARGET_URL="http://jenkins:${APP_PORT}/hello?name=TEST"
                     echo "Escaneando objetivo dinámico: ${TARGET_URL}"
 
-                    # 1. Spider (rastreo de rutas)
-                    curl -s --max-time 15 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/spider/action/scan/" || true
-                    sleep 5
+                    curl -s --max-time 20 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/spider/action/scan/"
+                    sleep 8
 
-                    # 2. Active Scan (búsqueda activa de vulnerabilidades como XSS)
-                    curl -s --max-time 15 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/ascan/action/scan/" || true
+                    curl -s --max-time 20 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/ascan/action/scan/"
                     sleep 15
 
-                    # 3. Descargar reporte HTML generado por ZAP
-                    curl -s --max-time 15 "${ZAP_API}/OTHER/core/other/htmlreport/" -o zap-report.html || true
-                    ls -lh dependency-check-report.html zap-report.html || true
+                    curl -s --max-time 20 "${ZAP_API}/OTHER/core/other/htmlreport/" -o zap-report.html
+                    ls -lh dependency-check-report.html zap-report.html
                 '''
             }
         }
