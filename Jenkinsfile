@@ -48,7 +48,7 @@ pipeline {
                     pipenv graph
                     pipenv requirements > requirements-locked.txt
                 '''
-                dependencyCheck additionalArguments: '--scan ./requirements-locked.txt --enableExperimental --noupdate --format HTML --out ./', odcInstallation: 'Dependency-Check-DSO'
+                dependencyCheck additionalArguments: '--scan ./requirements-locked.txt --enableExperimental --noupdate --failOnCVSS 7 --format HTML --out ./', odcInstallation: 'Dependency-Check-DSO'
             }
         }
 
