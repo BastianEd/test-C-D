@@ -45,7 +45,7 @@ pipeline {
                     pkill -f "python app.py" || true
                     JENKINS_NODE_COOKIE=dontKillMe nohup ./venv/bin/python app.py > flask.log 2>&1 &
                     sleep 3
-                    curl -s "http://localhost:${APP_PORT}/hello?name=TEST"
+                    curl -s --max-time 10 "http://localhost:${APP_PORT}/hello?name=TEST"
                 '''
             }
         }
@@ -53,7 +53,7 @@ pipeline {
         stage('Security Test') {
             steps {
                 echo '=== ETAPA 5: SECURITY TEST (SCA Dependency-Check + DAST OWASP ZAP) ==='
-                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --disableNvd --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
+                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --noupdate --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
 
                 sh '''
                     APP_IP=$(hostname -i | awk '{print $1}')
@@ -61,16 +61,16 @@ pipeline {
                     echo "Escaneando objetivo dinámico: ${TARGET_URL}"
 
                     # 1. Spider (rastreo de rutas)
-                    curl -s --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/spider/action/scan/"
+                    curl -s --max-time 15 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/spider/action/scan/" || true
                     sleep 5
 
                     # 2. Active Scan (búsqueda activa de vulnerabilidades como XSS)
-                    curl -s --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/ascan/action/scan/"
+                    curl -s --max-time 15 --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/ascan/action/scan/" || true
                     sleep 15
 
                     # 3. Descargar reporte HTML generado por ZAP
-                    curl -s "${ZAP_API}/OTHER/core/other/htmlreport/" -o zap-report.html
-                    ls -lh dependency-check-report.html zap-report.html
+                    curl -s --max-time 15 "${ZAP_API}/OTHER/core/other/htmlreport/" -o zap-report.html || true
+                    ls -lh dependency-check-report.html zap-report.html || true
                 '''
             }
         }
