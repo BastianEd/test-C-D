@@ -3,6 +3,8 @@
 @brief Aplicación web Flask documentada para trazabilidad y CI/CD (Guía 3.4.2).
 @author Bastian Rubio
 @version 1.0.0
+
+Rapanui
 """
 
 from flask import Flask, request
