@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,31,140,56"/>
+<area shape="rect" id="Node000001" href="$classtest__app_1_1TestApp.html" title="Clase de pruebas unitarias para la aplicación Flask." alt="" coords="199,5,332,31"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="154,30,198,24,199,29,154,35"/>
+<area shape="rect" id="Node000002" href="$classtest__hola_1_1TestBasico.html" title=" " alt="" coords="188,55,343,80"/>
+<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="154,51,188,55,187,60,154,56"/>
+</map>
