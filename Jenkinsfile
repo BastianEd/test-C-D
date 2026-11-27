@@ -53,7 +53,7 @@ pipeline {
         stage('Security Test') {
             steps {
                 echo '=== ETAPA 5: SECURITY TEST (SCA Dependency-Check + DAST OWASP ZAP) ==='
-                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
+                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --noupdate --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
 
                 sh '''
                     TARGET_URL="http://jenkins:${APP_PORT}/hello?name=TEST"
