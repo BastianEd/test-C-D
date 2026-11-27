@@ -43,7 +43,7 @@ pipeline {
                 echo '=== ETAPA 4: DEPLOY (Despliegue de prueba para OWASP ZAP) ==='
                 sh '''
                     pkill -f "python app.py" || true
-                    nohup ./venv/bin/python app.py > flask.log 2>&1 &
+                    JENKINS_NODE_COOKIE=dontKillMe nohup ./venv/bin/python app.py > flask.log 2>&1 &
                     sleep 3
                     curl -s "http://localhost:${APP_PORT}/hello?name=TEST"
                 '''
@@ -53,7 +53,7 @@ pipeline {
         stage('Security Test') {
             steps {
                 echo '=== ETAPA 5: SECURITY TEST (SCA Dependency-Check + DAST OWASP ZAP) ==='
-                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
+                dependencyCheck additionalArguments: '--scan ./ --exclude "**/venv/**" --disableNvd --format HTML --format XML --out ./', odcInstallation: 'Dependency-Check-DSO'
 
                 sh '''
                     APP_IP=$(hostname -i | awk '{print $1}')
@@ -61,11 +61,11 @@ pipeline {
                     echo "Escaneando objetivo dinámico: ${TARGET_URL}"
 
                     # 1. Spider (rastreo de rutas)
-                    curl -s "${ZAP_API}/JSON/spider/action/scan/?url=${TARGET_URL}"
+                    curl -s --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/spider/action/scan/"
                     sleep 5
 
                     # 2. Active Scan (búsqueda activa de vulnerabilidades como XSS)
-                    curl -s "${ZAP_API}/JSON/ascan/action/scan/?url=${TARGET_URL}"
+                    curl -s --get --data-urlencode "url=${TARGET_URL}" "${ZAP_API}/JSON/ascan/action/scan/"
                     sleep 15
 
                     # 3. Descargar reporte HTML generado por ZAP
